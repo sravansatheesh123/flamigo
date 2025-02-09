@@ -4,7 +4,13 @@ class Unshiped extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Unshipped Orders")),
+      appBar: AppBar(
+          backgroundColor: Color(0xffFFEEEE),
+          title: Center(
+              child: const Text(
+            "Unshipped Orders",
+            style: TextStyle(fontFamily: "roboto", fontSize: 16),
+          ))),
       body: Container(
         color: Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
@@ -94,7 +100,7 @@ class OrderCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: Color(0xffE15D5D),
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -103,7 +109,7 @@ class OrderCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.green,
+                          color: Color(0xff007580),
                         ),
                       ),
                     ],
