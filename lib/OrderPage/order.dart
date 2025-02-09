@@ -27,7 +27,7 @@ class _OrderState extends State<Order> {
       body: Column(
         children: [
           Container(
-            color: Colors.white,
+            color: const Color(0xffFFEEEE),
             padding: const EdgeInsets.all(10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -43,16 +43,16 @@ class _OrderState extends State<Order> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color.fromARGB(255, 248, 185, 209)
-                          : Colors.white,
+                      color:
+                          isSelected ? const Color(0xffE15D5D) : Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.black38),
                     ),
                     child: Text(
                       _tabs[index],
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14, // Set text size to 14
+                        fontFamily: 'Roboto', // Set font family to Roboto
                         fontWeight: FontWeight.w500,
                         color: isSelected ? Colors.white : Colors.black,
                       ),
