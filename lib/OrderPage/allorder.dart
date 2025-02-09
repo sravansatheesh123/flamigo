@@ -1,21 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class Allorder extends StatelessWidget {
+class Allorder extends StatefulWidget {
   const Allorder({super.key});
+
+  @override
+  State<Allorder> createState() => _AllorderState();
+}
+
+class _AllorderState extends State<Allorder> {
+  List<bool> isExpanded = [false, false];
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _openCamera() async {
+    await _picker.pickImage(source: ImageSource.camera);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white,
+        color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
         child: ListView.builder(
-          itemCount: 2, // Example: Displaying 2 orders
+          itemCount: 2,
           itemBuilder: (context, index) {
-            bool isUnshipped =
-                index == 0; // First card is unshipped, second is shipped
+            bool isUnshipped = index == 0;
             return Card(
+              color: Colors.white,
               elevation: 3,
               margin: const EdgeInsets.symmetric(vertical: 8),
               shape: RoundedRectangleBorder(
@@ -23,211 +35,151 @@ class Allorder extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Order ID Box
-                    Container(
-                      width: 70,
-                      height: 70,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[400], // Dark grey for contrast
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        isUnshipped
-                            ? "#123456"
-                            : "#654321", // Different order IDs
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 70,
+                          height: 70,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isUnshipped ? "#123456" : "#654321",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Order Details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isUnshipped ? "Sagar Suman" : "Rahul Sharma",
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            isUnshipped
-                                ? "123, Street Name, City, PIN - 560001"
-                                : "456, Another Street, City, PIN - 110011",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  _showUnshippedPopup(context);
-                                },
-                                child: Text(
-                                  isUnshipped ? "Unshipped" : "Shipped",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        isUnshipped ? Colors.red : Colors.green,
-                                    decoration: TextDecoration.underline,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      isUnshipped
+                                          ? "Sagar Suman"
+                                          : "Rahul Sharma",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Roboto",
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ),
+                                  IconButton(
+                                    icon: const Icon(Icons.camera_alt,
+                                        size: 20, color: Colors.black54),
+                                    onPressed: _openCamera,
+                                  ),
+                                ],
+                              ),
+                              Text(
+                                isUnshipped
+                                    ? "123, Street Name, City, PIN - 560001"
+                                    : "456, Another Street, City, PIN - 110011",
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontFamily: "Roboto",
+                                  color: Colors.grey,
                                 ),
                               ),
-                              const Text(
-                                "No Query",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.green,
-                                ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isExpanded[index] = !isExpanded[index];
+                                      });
+                                    },
+                                    child: Text(
+                                      isUnshipped ? "Unshipped" : "Shipped",
+                                      style: TextStyle(
+                                        fontFamily: "Roboto",
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: isUnshipped
+                                            ? Color(0xffCA4040)
+                                            : Color(0xff007580),
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  const Text(
+                                    "No Query",
+                                    style: TextStyle(
+                                      fontFamily: "Roboto",
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xff007580),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                        ),
+                      ],
+                    ),
+                    if (isExpanded[index]) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Courier",
+                              style: TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500)),
+                          IconButton(
+                            icon: const Icon(Icons.camera_alt,
+                                size: 20, color: Colors.black54),
+                            onPressed: _openCamera,
+                          ),
                         ],
                       ),
-                    ),
-
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt, color: Colors.black54),
-                      onPressed: () {},
-                    ),
+                      const SizedBox(
+                        width: double.infinity,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Enter courier name",
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text("Tracking ID",
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w500)),
+                      const SizedBox(
+                        width: double.infinity,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Enter tracking ID",
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                   ],
                 ),
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  void _showUnshippedPopup(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: "",
-      transitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return const SizedBox(); // Required placeholder
-      },
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, -1), // Start from the top
-            end: Offset.zero, // Move to its normal position
-          ).animate(CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeInOut,
-          )),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: _buildPopupBox(context),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPopupBox(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        width: MediaQuery.of(context).size.width,
-        height:
-            MediaQuery.of(context).size.height * 0.4, // 40% of screen height
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              spreadRadius: 2,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Row for "Courier" text and Camera Icon
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Courier",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.camera_alt, color: Colors.black54),
-                    onPressed: () async {
-                      final ImagePicker picker = ImagePicker();
-                      final XFile? image = await picker.pickImage(
-                        source: ImageSource.camera,
-                      );
-                      if (image != null) {
-                        print("Captured Image Path: ${image.path}");
-                      }
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Enter courier name",
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Tracking ID",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 5),
-              TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: "Enter tracking ID",
-                ),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 248, 185, 209),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text("Submit",
-                      style: TextStyle(color: Colors.white)),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -6,7 +6,7 @@ class Unshiped extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Unshipped Orders")),
       body: Container(
-        color: Colors.white,
+        color: Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
         child: ListView.builder(
           itemCount: 5, // Example: Displaying 5 unshipped orders
@@ -41,6 +41,7 @@ class OrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Colors.white,
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -55,7 +56,7 @@ class OrderCard extends StatelessWidget {
               height: 70,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Colors.grey[400],
+                color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

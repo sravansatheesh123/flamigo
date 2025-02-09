@@ -31,11 +31,11 @@ class _HomemainState extends State<Bottamnaviagtion> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 248, 185, 209),
+        backgroundColor: Color(0xffFFB6B6),
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(100),
           child: Container(
-            color: const Color.fromARGB(255, 243, 195, 211),
+            color: Color(0xffFFB6B6),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
             child: Column(
               children: [
@@ -80,12 +80,22 @@ class _HomemainState extends State<Bottamnaviagtion> {
                 SizedBox(
                   height: 40,
                   child: TextField(
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Roboto',
+                      color: Colors.grey,
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
                       prefixIcon: const Icon(Icons.search, color: Colors.grey),
                       suffixIcon: const Icon(Icons.mic, color: Colors.grey),
-                      hintText: "Search...",
+                      hintText: "Search using name or contact",
+                      hintStyle: const TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'Roboto',
+                        color: Colors.grey,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 8),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -98,10 +108,10 @@ class _HomemainState extends State<Bottamnaviagtion> {
             ),
           ),
         ),
-        body: _pages[_selectedIndex], // Only this part changes
+        body: _pages[_selectedIndex],
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
-          color: const Color.fromARGB(255, 248, 185, 209),
+          color: Color(0xffFFB6B6),
           child: GNav(
             rippleColor: Colors.grey[300]!,
             hoverColor: Colors.grey[100]!,
@@ -121,11 +131,11 @@ class _HomemainState extends State<Bottamnaviagtion> {
                 text: 'Home',
               ),
               GButton(
-                icon: LineIcons.shoppingCart, // Order Page Icon
+                icon: LineIcons.shoppingCart,
                 text: 'Orders',
               ),
               GButton(
-                icon: LineIcons.user, // Profile Page Icon
+                icon: LineIcons.user,
                 text: 'Profile',
               ),
             ],

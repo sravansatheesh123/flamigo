@@ -64,7 +64,7 @@ class _HomepageState extends State<Homepage> {
       body: Stack(
         children: [
           Container(
-            color: const Color.fromARGB(255, 250, 249, 249),
+            color: Color(0xffFFEEEE),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
@@ -77,7 +77,7 @@ class _HomepageState extends State<Homepage> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: const Color.fromARGB(255, 249, 208, 222),
+                            color: Color(0xffFFB6B6),
                             width: 2,
                           ),
                         ),
@@ -91,7 +91,7 @@ class _HomepageState extends State<Homepage> {
                             children: [
                               if (!_isTextEntered)
                                 const Text(
-                                  "Type here...",
+                                  "Enter order details here...............",
                                   style: TextStyle(
                                     color: Colors.grey,
                                     fontSize: 14,
@@ -118,8 +118,7 @@ class _HomepageState extends State<Homepage> {
                         child: ElevatedButton(
                           onPressed: _showAmountPopup,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 248, 185, 209),
+                            backgroundColor: Color(0xffE15D5D),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -172,7 +171,8 @@ class _HomepageState extends State<Homepage> {
               const Text(
                 "Enter the amount for customer",
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
+                  fontFamily: "Roboto",
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -205,9 +205,17 @@ class _HomepageState extends State<Homepage> {
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,
+            style: const TextStyle(
+              fontSize: 15, // Set text size to 15
+              fontFamily: 'Roboto', // Set font family to Roboto
+            ),
             decoration: InputDecoration(
               hintText: "Enter amount",
-              filled: true,
+              hintStyle: const TextStyle(
+                fontSize: 15, // Set hint text size to 15
+                fontFamily: 'Roboto', // Set hint font family to Roboto
+                color: Colors.grey, // Optional: Keep hint color subtle
+              ),
               fillColor: Colors.white,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -223,7 +231,7 @@ class _HomepageState extends State<Homepage> {
             child: ElevatedButton(
               onPressed: _submitAmount,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 248, 185, 209),
+                backgroundColor: Color(0xffE15D5D),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
