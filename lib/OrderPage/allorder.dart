@@ -31,7 +31,7 @@ class _AllorderState extends State<Allorder> {
               elevation: 3,
               margin: const EdgeInsets.symmetric(vertical: 8),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.zero,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
@@ -47,7 +47,7 @@ class _AllorderState extends State<Allorder> {
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.zero,
                           ),
                           child: Text(
                             isUnshipped ? "#123456" : "#654321",
@@ -174,6 +174,20 @@ class _AllorderState extends State<Allorder> {
                         ),
                       ),
                       const SizedBox(height: 10),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // Handle submit action
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xffE15D5D),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 10),
+                          ),
+                          child: const Text("Submit"),
+                        ),
+                      ),
                     ],
                   ],
                 ),
