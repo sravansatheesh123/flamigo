@@ -12,11 +12,9 @@ class _HomepageState extends State<Homepage> {
   final TextEditingController _controller = TextEditingController();
   final List<TextEditingController> _textControllers =
       List.generate(6, (index) => TextEditingController());
-  final TextEditingController _amountController = TextEditingController();
   bool _isTextEntered = false;
   bool _showOrderPopup = false;
-  bool _showAmountPopup = false;
-  bool _isGSTSelected = true;
+  bool _isGSTSelected = false;
 
   @override
   void initState() {
@@ -34,27 +32,10 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
-  void _showAmountDetailsPopup() {
-    setState(() {
-      _showOrderPopup = false;
-      _showAmountPopup = true;
-    });
-  }
-
   void _toggleGSTSelection() {
     setState(() {
       _isGSTSelected = !_isGSTSelected;
     });
-  }
-
-  void _submitAmount() {
-    setState(() {
-      _showAmountPopup = false;
-    });
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const Order()),
-    );
   }
 
   @override
@@ -140,7 +121,6 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                   if (_showOrderPopup) _buildOrderPopup(),
-                  if (_showAmountPopup) _buildAmountPopup(),
                 ],
               ),
             ],
@@ -176,12 +156,24 @@ class _HomepageState extends State<Homepage> {
             _buildTextField("Address", _textControllers[3]),
             _buildTextField("Contact", _textControllers[4]),
             _buildTextField("Color", _textControllers[5]),
+
+            // Move GST checkbox below all text fields
+            _buildGSTCheckbox(),
+
             const SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: _showAmountDetailsPopup,
+                  onPressed: () {
+                    setState(() {
+                      _showOrderPopup = false;
+                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Order()),
+                    );
+                  },
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   child: const Text("Confirm",
@@ -206,79 +198,35 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildAmountPopup() {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              spreadRadius: 2,
-              offset: const Offset(0, 4),
+  Widget _buildGSTCheckbox() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: _toggleGSTSelection,
+            child: Icon(
+              _isGSTSelected ? Icons.check_box : Icons.check_box_outline_blank,
+              color: _isGSTSelected ? Colors.green : Colors.grey,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Enter the amount for customer",
-                    style:
-                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                GestureDetector(
-                  onTap: _toggleGSTSelection,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: _isGSTSelected ? Colors.green : Colors.grey,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text("GST",
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: "Enter amount",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: _submitAmount,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Color(0xffE15D5D)),
-              child:
-                  const Text("Submit", style: TextStyle(color: Colors.white)),
-            ),
-          ],
+          ),
+          const SizedBox(width: 5),
+          const Text("Inclusive of GST"),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
         ),
       ),
     );
   }
-}
-
-Widget _buildTextField(String label, TextEditingController controller) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 5),
-    child: TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    ),
-  );
 }
