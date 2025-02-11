@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:new_projectes/OrderPage/order.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // To convert the data to JSON
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -36,6 +38,62 @@ class _HomepageState extends State<Homepage> {
     setState(() {
       _isGSTSelected = !_isGSTSelected;
     });
+  }
+
+  Future<void> _submitOrder() async {
+    // Get data from text fields
+    String orderId = _textControllers[0].text;
+    String orderDetails = _textControllers[1].text;
+    String receiverName = _textControllers[2].text;
+    String address = _textControllers[3].text;
+    String contact = _textControllers[4].text;
+    String color = _textControllers[5].text;
+
+    // Prepare the data to send in the POST request
+    Map<String, dynamic> orderData = {
+      'order_id': orderId,
+      'order_details': orderDetails,
+      'receiver_name': receiverName,
+      'address': address,
+      'contact': contact,
+      'color': color,
+      'is_gst_inclusive': "true",
+    };
+
+    // API URL
+    final Uri apiUrl = Uri.parse('http://192.168.1.3:5000/orders');
+
+    try {
+      final response = await http.post(
+        apiUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(orderData),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully submitted the order
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Order submitted successfully!')),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Order(),
+          ),
+        );
+      } else {
+        // Handle failure response
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to submit order')),
+        );
+      }
+    } catch (e) {
+      // Handle network error or any other exceptions
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('An error occurred. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -165,15 +223,7 @@ class _HomepageState extends State<Homepage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _showOrderPopup = false;
-                    });
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const Order()),
-                    );
-                  },
+                  onPressed: _submitOrder,
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   child: const Text("Confirm",
