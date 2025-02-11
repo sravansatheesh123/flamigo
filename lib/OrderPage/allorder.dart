@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Allorder extends StatefulWidget {
   const Allorder({super.key});
@@ -9,11 +11,79 @@ class Allorder extends StatefulWidget {
 }
 
 class _AllorderState extends State<Allorder> {
-  List<bool> isExpanded = [false, false];
+  List<bool> isExpanded = [];
   final ImagePicker _picker = ImagePicker();
+
+  // List to store fetched order data
+  List<Map<String, dynamic>> _orders = [];
+
+  // Store the courier name and tracking ID for each order
+  List<Map<String, String>> _courierDetails = [];
 
   Future<void> _openCamera() async {
     await _picker.pickImage(source: ImageSource.camera);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  // Function to fetch data from the server
+  Future<void> fetchData() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://192.168.1.3:5000/orders'));
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response if successful
+        var data = json.decode(response.body);
+        setState(() {
+          _orders = List<Map<String, dynamic>>.from(data);
+          isExpanded =
+              List<bool>.filled(_orders.length, false); // initialize isExpanded
+          _courierDetails = List.generate(
+              _orders.length, (_) => {"courierName": "", "trackingId": ""});
+        });
+        print('Response data: $_orders');
+      } else {
+        print('Failed to load data');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
+  // Function to handle the PUT request for updating the order
+  Future<void> updateOrder(int index) async {
+    try {
+      final order = _orders[index];
+      final courierName = _courierDetails[index]["courierName"];
+      final trackingId = _courierDetails[index]["trackingId"];
+
+      final url = Uri.parse('http://192.168.1.3:5000/orders/${order['_id']}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          "courierName": courierName,
+          "trackingId": trackingId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully updated the order
+        print('Order updated successfully');
+        // Optionally, you can reload the data after the update, or handle the UI accordingly
+        fetchData(); // Re-fetch data to reflect the updated order
+      } else {
+        print('Failed to update the order');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
   }
 
   @override
@@ -23,9 +93,10 @@ class _AllorderState extends State<Allorder> {
         color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
         child: ListView.builder(
-          itemCount: 2,
+          itemCount: _orders.length, // Use the length of _orders
           itemBuilder: (context, index) {
-            bool isUnshipped = index == 0;
+            var order = _orders[index];
+
             return Card(
               color: Colors.white,
               elevation: 3,
@@ -50,7 +121,7 @@ class _AllorderState extends State<Allorder> {
                             borderRadius: BorderRadius.zero,
                           ),
                           child: Text(
-                            isUnshipped ? "#123456" : "#654321",
+                            order['orderId'] ?? 'No Order ID',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 16,
@@ -70,9 +141,7 @@ class _AllorderState extends State<Allorder> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      isUnshipped
-                                          ? "Sagar Suman"
-                                          : "Rahul Sharma",
+                                      order['name'] ?? 'No Name',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontFamily: "Roboto",
@@ -88,9 +157,7 @@ class _AllorderState extends State<Allorder> {
                                 ],
                               ),
                               Text(
-                                isUnshipped
-                                    ? "123, Street Name, City, PIN - 560001"
-                                    : "456, Another Street, City, PIN - 110011",
+                                order['address'] ?? 'No Address',
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontFamily: "Roboto",
@@ -107,12 +174,14 @@ class _AllorderState extends State<Allorder> {
                                       });
                                     },
                                     child: Text(
-                                      isUnshipped ? "Unshipped" : "Shipped",
+                                      order['unshipped'] == true
+                                          ? "Unshipped"
+                                          : "Shipped",
                                       style: TextStyle(
                                         fontFamily: "Roboto",
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: isUnshipped
+                                        color: order['unshipped'] == true
                                             ? Color(0xffCA4040)
                                             : Color(0xff007580),
                                         decoration: TextDecoration.underline,
@@ -151,33 +220,37 @@ class _AllorderState extends State<Allorder> {
                           ),
                         ],
                       ),
-                      const SizedBox(
-                        width: double.infinity,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: "Enter courier name",
-                          ),
+                      TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            _courierDetails[index]["courierName"] = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: "Enter courier name",
                         ),
                       ),
                       const SizedBox(height: 10),
                       const Text("Tracking ID",
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.w500)),
-                      const SizedBox(
-                        width: double.infinity,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: "Enter tracking ID",
-                          ),
+                      TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            _courierDetails[index]["trackingId"] = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          hintText: "Enter tracking ID",
                         ),
                       ),
                       const SizedBox(height: 10),
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            // Handle submit action
+                            updateOrder(index); // Update order on Submit
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xffE15D5D),
