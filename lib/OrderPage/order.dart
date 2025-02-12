@@ -4,6 +4,8 @@ import 'package:new_projectes/OrderPage/enquriy.dart';
 import 'package:new_projectes/OrderPage/unshiped.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:google_nav_bar/google_nav_bar.dart'; // Add this import for GNav
+import 'package:line_icons/line_icons.dart'; // Add this import for LineIcons
 
 class Order extends StatefulWidget {
   const Order({super.key});
@@ -19,7 +21,7 @@ class _OrderState extends State<Order> {
   final List<Widget> _pages = [
     const Allorder(),
     Unshiped(),
-    const Enquriy(),
+    const Enquiry(),
   ];
 
   @override
@@ -45,6 +47,13 @@ class _OrderState extends State<Order> {
     } catch (e) {
       print('Error occurred: $e');
     }
+  }
+
+  // Handle tab item change for bottom navigation
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -169,6 +178,38 @@ class _OrderState extends State<Order> {
             child: _pages[_selectedIndex],
           ),
         ],
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        color: Color(0xffFFB6B6),
+        child: GNav(
+          rippleColor: Colors.grey[300]!,
+          hoverColor: Colors.grey[100]!,
+          haptic: true,
+          tabBorderRadius: 15,
+          gap: 8,
+          color: Colors.grey[800]!,
+          activeColor: Colors.white,
+          iconSize: 24,
+          tabBackgroundColor: Colors.white.withOpacity(0.1),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          selectedIndex: _selectedIndex,
+          onTabChange: _onItemTapped,
+          tabs: const [
+            GButton(
+              icon: LineIcons.home,
+              text: 'Home',
+            ),
+            GButton(
+              icon: LineIcons.shoppingCart,
+              text: 'Orders',
+            ),
+            GButton(
+              icon: LineIcons.user,
+              text: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }

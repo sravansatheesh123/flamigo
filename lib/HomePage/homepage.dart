@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:new_projectes/OrderPage/order.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert'; // To convert the data to JSON
+import 'dart:convert';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -40,6 +40,8 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  String trackingId = DateTime.now().millisecondsSinceEpoch.toString();
+
   Future<void> _submitOrder() async {
     // Get data from text fields
     String orderId = _textControllers[0].text;
@@ -48,33 +50,44 @@ class _HomepageState extends State<Homepage> {
     String address = _textControllers[3].text;
     String contact = _textControllers[4].text;
     String color = _textControllers[5].text;
+    String trackingId = '';
 
-    // Prepare the data to send in the POST request
-    Map<String, dynamic> orderData = {
+    Map<String, String> orderData = {
       'order_id': orderId,
       'order_details': orderDetails,
       'receiver_name': receiverName,
       'address': address,
       'contact': contact,
       'color': color,
-      'is_gst_inclusive': "true",
+      'trackingId': trackingId,
+      'is_gst_inclusive': 'false',
     };
 
     // API URL
     final Uri apiUrl = Uri.parse('http://192.168.1.3:5000/orders');
 
     try {
-      final response = await http.post(
-        apiUrl,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(orderData),
-      );
+      // Creating a multipart request
+      var request = http.MultipartRequest('POST', apiUrl)
+        ..fields.addAll(orderData);
 
-      if (response.statusCode == 200) {
-        // Successfully submitted the order
+      // Send the request
+      final response = await request.send();
+
+      // Get the response
+      final responseBody = await http.Response.fromStream(response);
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${responseBody.body}');
+
+      if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order submitted successfully!')),
         );
+
+        for (var controller in _textControllers) {
+          controller.clear();
+        }
 
         Navigator.push(
           context,
@@ -83,13 +96,11 @@ class _HomepageState extends State<Homepage> {
           ),
         );
       } else {
-        // Handle failure response
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to submit order')),
         );
       }
     } catch (e) {
-      // Handle network error or any other exceptions
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('An error occurred. Please try again.')),
       );
