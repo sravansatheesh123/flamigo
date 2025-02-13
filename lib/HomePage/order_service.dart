@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 
 class OrderService {
-  static const String apiUrl = "http://192.168.1.3:5000/orders";
+  static const String apiUrl = "http://192.168.1.3:5100/orders";
 
   static Future<void> createOrder(
     String orderId,
