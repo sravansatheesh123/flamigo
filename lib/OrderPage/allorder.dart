@@ -32,7 +32,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.3:5000/orders'));
+          await http.get(Uri.parse('http://192.168.1.3:5100/orders'));
 
       if (response.statusCode == 200) {
         // Parse the JSON response if successful
@@ -60,7 +60,7 @@ class _AllorderState extends State<Allorder> {
       final courierName = _courierDetails[index]["courierName"];
       final trackingId = _courierDetails[index]["trackingId"];
 
-      final url = Uri.parse('http://192.168.1.3:5000/orders/${order['_id']}');
+      final url = Uri.parse('http://192.168.1.3:5100/orders/${order['_id']}');
 
       final response = await http.put(
         url,
@@ -87,8 +87,6 @@ class _AllorderState extends State<Allorder> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      
       body: Container(
         color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:new_projectes/HomePage/bottamnaviagtion.dart';
 import 'package:new_projectes/OrderPage/order.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -14,6 +15,8 @@ class _HomepageState extends State<Homepage> {
   final TextEditingController _controller = TextEditingController();
   final List<TextEditingController> _textControllers =
       List.generate(6, (index) => TextEditingController());
+  final TextEditingController _nameController =
+      TextEditingController(); // Added controller for name field
   bool _isTextEntered = false;
   bool _showOrderPopup = false;
   bool _isGSTSelected = false;
@@ -50,6 +53,7 @@ class _HomepageState extends State<Homepage> {
     String address = _textControllers[3].text;
     String contact = _textControllers[4].text;
     String color = _textControllers[5].text;
+    String name = _nameController.text;
     String trackingId = '';
 
     Map<String, String> orderData = {
@@ -59,12 +63,13 @@ class _HomepageState extends State<Homepage> {
       'address': address,
       'contact': contact,
       'color': color,
+      'customer_name': name,
       'trackingId': trackingId,
       'is_gst_inclusive': 'false',
     };
 
     // API URL
-    final Uri apiUrl = Uri.parse('http://192.168.1.3:5000/orders');
+    final Uri apiUrl = Uri.parse('http://192.168.1.3:5100/orders');
 
     try {
       // Creating a multipart request
@@ -89,10 +94,12 @@ class _HomepageState extends State<Homepage> {
           controller.clear();
         }
 
+        _nameController.clear(); // Clear the customer name controller
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Order(),
+            builder: (context) => Bottamnaviagtion(),
           ),
         );
       } else {
@@ -225,6 +232,8 @@ class _HomepageState extends State<Homepage> {
             _buildTextField("Address", _textControllers[3]),
             _buildTextField("Contact", _textControllers[4]),
             _buildTextField("Color", _textControllers[5]),
+            _buildTextField(
+                "Customer Name", _nameController), // Add the new name field
 
             // Move GST checkbox below all text fields
             _buildGSTCheckbox(),
