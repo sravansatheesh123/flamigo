@@ -32,9 +32,87 @@ class _HomepageState extends State<Homepage> {
   }
 
   void _showOrderDetailsPopup() {
+    String enteredText = _controller.text;
+    List<String> lines = enteredText.split("\n");
+
     setState(() {
+      _textControllers[0].text =
+          _extractOrderId(lines); // Extract Order ID from details
+      _textControllers[1].text =
+          _extractItemDetails(lines); // Extract full item details
+
+      _textControllers[2].text =
+          _extractDetail(lines, "Receiver’s name"); // Receiver Name
+      _textControllers[3].text = _extractAddress(lines); // Address
+      _textControllers[4].text = _extractDetail(lines, "Contact"); // Contact
+      _textControllers[5].text = _extractDetail(lines, "Color"); // Color
+      _nameController.text =
+          _extractDetail(lines, "Name on gift items"); // Customer Name
+
       _showOrderPopup = true;
     });
+  }
+
+// *Extract Order ID from text (detects the first order-like number)*
+  String _extractOrderId(List<String> lines) {
+    RegExp orderIdPattern =
+        RegExp(r"\d{2}-\d{2}-\d{2}-F\d+"); // Matches format like 08-02-25-F2
+
+    for (String line in lines) {
+      Match? match = orderIdPattern.firstMatch(line);
+      if (match != null) {
+        return match.group(0) ?? ""; // Return the first matched order ID
+      }
+    }
+    return "";
+  }
+
+// Extract full item details (including numbered list)
+  String _extractItemDetails(List<String> lines) {
+    StringBuffer items = StringBuffer();
+    bool startAdding = false;
+
+    for (String line in lines) {
+      if (line.contains("(Item details)")) {
+        startAdding = true;
+        continue; // Skip the (Item details) line
+      }
+      if (startAdding) {
+        if (line.contains("Receiver’s name"))
+          break; // Stop at receiver's details
+        items.writeln(line.trim());
+      }
+    }
+    return items.toString().trim();
+  }
+
+// Extract address (multi-line)
+  String _extractAddress(List<String> lines) {
+    StringBuffer address = StringBuffer();
+    bool startAdding = false;
+
+    for (String line in lines) {
+      if (line.contains("Address")) {
+        startAdding = true;
+        continue;
+      }
+      if (startAdding) {
+        if (line.contains("State") || line.contains("Pincode"))
+          break; // Stop at state/pincode
+        address.writeln(line.trim());
+      }
+    }
+    return address.toString().trim();
+  }
+
+// Helper function to extract details from text
+  String _extractDetail(List<String> lines, String fieldName) {
+    for (String line in lines) {
+      if (line.startsWith(fieldName)) {
+        return line.substring(fieldName.length + 1).trim();
+      }
+    }
+    return "";
   }
 
   void _toggleGSTSelection() {
@@ -69,7 +147,7 @@ class _HomepageState extends State<Homepage> {
     };
 
     // API URL
-    final Uri apiUrl = Uri.parse('http://192.168.1.3:5100/orders');
+    final Uri apiUrl = Uri.parse('http://192.168.29.10:5100/orders');
 
     try {
       // Creating a multipart request
