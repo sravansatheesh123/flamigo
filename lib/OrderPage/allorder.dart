@@ -28,11 +28,10 @@ class _AllorderState extends State<Allorder> {
     fetchData();
   }
 
-  // Function to fetch data from the server
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.3:5100/orders'));
+          await http.get(Uri.parse('http://192.168.29.10:5100/orders'));
 
       if (response.statusCode == 200) {
         // Parse the JSON response if successful
@@ -60,7 +59,7 @@ class _AllorderState extends State<Allorder> {
       final courierName = _courierDetails[index]["courierName"];
       final trackingId = _courierDetails[index]["trackingId"];
 
-      final url = Uri.parse('http://192.168.1.3:5100/orders/${order['_id']}');
+      final url = Uri.parse('http://192.168.29.10:5100/orders/${order['_id']}');
 
       final response = await http.put(
         url,
@@ -139,7 +138,9 @@ class _AllorderState extends State<Allorder> {
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      order['name'] ?? 'No Name',
+                                      (order['name']?.isEmpty ?? true)
+                                          ? 'Sagar Suman'
+                                          : order['name'],
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontFamily: "Roboto",
