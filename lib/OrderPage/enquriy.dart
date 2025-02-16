@@ -31,7 +31,7 @@ class _EnquiryState extends State<Enquiry> {
       isLoading = true;
     });
 
-    final url = 'http://192.168.1.7:5000/orders/contact?contact=$contact';
+    final url = 'http://localhost:5000/orders/contact?contact=$contact';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -174,6 +174,8 @@ class _EnquiryState extends State<Enquiry> {
         ),
       ),
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
         color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(

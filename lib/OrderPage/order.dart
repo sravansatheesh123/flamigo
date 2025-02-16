@@ -19,24 +19,21 @@ class _OrderState extends State<Order> {
   final List<Widget> _pages = [
     const Allorder(),
     Unshipped(),
-    const Enquiry(),
+    Enquiry(),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Fetch data when the widget is initialized
     fetchData();
   }
 
-  // Function to make GET request and print the response
   Future<void> fetchData() async {
     try {
       final response =
           await http.get(Uri.parse('http://192.168.29.10:5000/orders'));
 
       if (response.statusCode == 200) {
-        // Parse the JSON response if successful
         var data = json.decode(response.body);
         print('Response data: $data');
       } else {
@@ -51,12 +48,14 @@ class _OrderState extends State<Order> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _selectedIndex == 2 // Hide AppBar on Enquiry tab
+
+      // Hide AppBar when "Enquiry" tab is selected
+      appBar: _selectedIndex == 2
           ? null
           : PreferredSize(
               preferredSize: const Size.fromHeight(100),
               child: Container(
-                color: Color(0xffFFB6B6),
+                color: const Color(0xffFFB6B6),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                 child: Column(
@@ -132,44 +131,48 @@ class _OrderState extends State<Order> {
                 ),
               ),
             ),
+
       body: Column(
         children: [
-          Container(
-            color: const Color(0xffFFEEEE),
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(_tabs.length, (index) {
-                bool isSelected = _selectedIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                    decoration: BoxDecoration(
-                      color:
-                          isSelected ? const Color(0xffE15D5D) : Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.black38),
-                    ),
-                    child: Text(
-                      _tabs[index],
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Roboto',
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black,
+          // Hide the tab view when "Enquiry" is selected
+          if (_selectedIndex != 2)
+            Container(
+              color: const Color(0xffFFEEEE),
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(_tabs.length, (index) {
+                  bool isSelected = _selectedIndex == index;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 8),
+                      decoration: BoxDecoration(
+                        color:
+                            isSelected ? const Color(0xffE15D5D) : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.black38),
+                      ),
+                      child: Text(
+                        _tabs[index],
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.w500,
+                          color: isSelected ? Colors.white : Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }),
+              ),
             ),
-          ),
+
           Expanded(
             child: _pages[_selectedIndex],
           ),
