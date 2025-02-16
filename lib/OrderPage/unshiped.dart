@@ -46,18 +46,27 @@ class _UnshippedState extends State<Unshipped> {
       body: Container(
         color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
-        child: ListView.builder(
-          itemCount: _orders.length,
-          itemBuilder: (context, index) {
-            var order = _orders[index];
-            return OrderCard(
-              orderId: order['orderId'] ?? 'No Order ID',
-              customerName: order['receiverName'] ?? 'No Name',
-              address: order['address'] ?? 'No Address',
-              status: order['shippedUnshippedStatus'] ? 'Shipped' : 'Unshipped',
-            );
-          },
-        ),
+        child: _orders.isEmpty
+            ? const Center(
+                child: Text(
+                  'No orders',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              )
+            : ListView.builder(
+                itemCount: _orders.length,
+                itemBuilder: (context, index) {
+                  var order = _orders[index];
+                  return OrderCard(
+                    orderId: order['orderId'] ?? 'No Order ID',
+                    customerName: order['receiverName'] ?? 'No Name',
+                    address: order['address'] ?? 'No Address',
+                    status: order['shippedUnshippedStatus']
+                        ? 'Shipped'
+                        : 'Unshipped',
+                  );
+                },
+              ),
       ),
     );
   }
