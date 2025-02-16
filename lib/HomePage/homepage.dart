@@ -14,9 +14,8 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   final TextEditingController _controller = TextEditingController();
   final List<TextEditingController> _textControllers =
-      List.generate(6, (index) => TextEditingController());
-  final TextEditingController _nameController =
-      TextEditingController(); // Added controller for name field
+      List.generate(7, (index) => TextEditingController());
+  final TextEditingController _nameController = TextEditingController();
   bool _isTextEntered = false;
   bool _showOrderPopup = false;
   bool _isGSTSelected = false;
@@ -36,32 +35,27 @@ class _HomepageState extends State<Homepage> {
     List<String> lines = enteredText.split("\n");
 
     setState(() {
-      _textControllers[0].text =
-          _extractOrderId(lines); // Extract Order ID from details
-      _textControllers[1].text =
-          _extractItemDetails(lines); // Extract full item details
+      _textControllers[0].text = _extractOrderId(lines);
+      _textControllers[1].text = _extractItemDetails(lines);
 
-      _textControllers[2].text =
-          _extractDetail(lines, "Receiver’s name"); // Receiver Name
-      _textControllers[3].text = _extractAddress(lines); // Address
-      _textControllers[4].text = _extractDetail(lines, "Contact"); // Contact
-      _textControllers[5].text = _extractDetail(lines, "Color"); // Color
-      _nameController.text =
-          _extractDetail(lines, "Name on gift items"); // Customer Name
+      _textControllers[2].text = _extractDetail(lines, "Receiver’s name");
+      _textControllers[3].text = _extractAddress(lines);
+      _textControllers[4].text = _extractDetail(lines, "Contact");
+      _textControllers[5].text = _extractDetail(lines, "Color");
+      _textControllers[6].text = _extractDetail(lines, "Amount");
+      _nameController.text = _extractDetail(lines, "");
 
       _showOrderPopup = true;
     });
   }
 
-// *Extract Order ID from text (detects the first order-like number)*
   String _extractOrderId(List<String> lines) {
-    RegExp orderIdPattern =
-        RegExp(r"\d{2}-\d{2}-\d{2}-F\d+"); // Matches format like 08-02-25-F2
+    RegExp orderIdPattern = RegExp(r"\d{2}-\d{2}-\d{2}-F\d+");
 
     for (String line in lines) {
       Match? match = orderIdPattern.firstMatch(line);
       if (match != null) {
-        return match.group(0) ?? ""; // Return the first matched order ID
+        return match.group(0) ?? "";
       }
     }
     return "";
@@ -105,7 +99,6 @@ class _HomepageState extends State<Homepage> {
     return address.toString().trim();
   }
 
-// Helper function to extract details from text
   String _extractDetail(List<String> lines, String fieldName) {
     for (String line in lines) {
       if (line.startsWith(fieldName)) {
@@ -131,9 +124,11 @@ class _HomepageState extends State<Homepage> {
     String address = _textControllers[3].text;
     String contact = _textControllers[4].text;
     String color = _textControllers[5].text;
-    String name = _nameController.text;
+    String amount = _textControllers[6].text;
+
     String trackingId = DateTime.now().millisecondsSinceEpoch.toString();
 
+    // API data to send
     Map<String, String> orderData = {
       'orderId': orderId,
       'orderDetails': orderDetails,
@@ -141,7 +136,7 @@ class _HomepageState extends State<Homepage> {
       'address': address,
       'contact': contact,
       'color': color,
-      'customer_name': name,
+      'amount': amount,
       'trackingId': trackingId,
       'gst': 'false',
     };
@@ -172,8 +167,7 @@ class _HomepageState extends State<Homepage> {
           controller.clear();
         }
 
-        _nameController.clear(); // Clear the customer name controller
-
+        _nameController.clear();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -310,8 +304,7 @@ class _HomepageState extends State<Homepage> {
             _buildTextField("Address", _textControllers[3]),
             _buildTextField("Contact", _textControllers[4]),
             _buildTextField("Color", _textControllers[5]),
-            _buildTextField(
-                "Customer Name", _nameController), // Add the new name field
+            _buildTextField("Amount", _textControllers[6]),
 
             // Move GST checkbox below all text fields
             _buildGSTCheckbox(),
