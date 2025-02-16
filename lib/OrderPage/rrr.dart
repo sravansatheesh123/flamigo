@@ -359,8 +359,6 @@ class Receipt extends StatelessWidget {
             ],
           ),
         ),
-     
-     
       ),
     );
   }

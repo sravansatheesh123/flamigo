@@ -35,12 +35,10 @@ class _AllorderState extends State<Allorder> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
 
-        // Access the 'orders' key from the response
         if (data['orders'] != null) {
           setState(() {
             _orders = List<Map<String, dynamic>>.from(data['orders']);
 
-            // Initialize shipmentStatus based on shippedUnshippedStatus for each order
             shipmentStatus = _orders
                 .map((order) => order['shippedUnshippedStatus'] == true
                     ? "Shipped"
@@ -63,9 +61,11 @@ class _AllorderState extends State<Allorder> {
   }
 
   Future<void> updateOrder(
-      String, String courierName, String trackingId) async {
+      String orderId, String courierName, String trackingId) async {
     try {
-      final url = 'http://localhost:5000/orders/67b187dcf9c72f3e395a6401';
+      // Use the _id directly in the URL
+      final url =
+          'http://localhost:5000/orders/$orderId'; // Dynamic orderId (_id)
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -76,7 +76,7 @@ class _AllorderState extends State<Allorder> {
       );
 
       if (response.statusCode == 200) {
-        fetchData();
+        fetchData(); // Reload the data after updating
         print('Order updated successfully');
       } else {
         print('Failed to update order');
@@ -96,199 +96,225 @@ class _AllorderState extends State<Allorder> {
           itemCount: _orders.length,
           itemBuilder: (context, index) {
             var order = _orders[index];
-            return Card(
-              color: Colors.white,
-              elevation: 3,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.zero,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 70,
-                          height: 50,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.zero,
-                          ),
-                          child: Text(
-                            order['orderId'] ?? 'No Order ID',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+            return GestureDetector(
+              onTap: () {
+                // Pass the _id to the updateOrder function when the card is tapped
+                updateOrder(
+                    order['_id'],
+                    _courierDetails[index]["courierName"]!,
+                    _courierDetails[index]["trackingId"]!);
+              },
+              child: Card(
+                color: Colors.white,
+                elevation: 3,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 50,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.zero,
+                            ),
+                            child: Text(
+                              order['orderId'] ?? 'No Order ID',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 0, 0, 0),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                order['receiverName'] ?? 'No Name',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                order['address'] ?? 'No Address',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.camera_alt,
-                              size: 20, color: Colors.black54),
-                          onPressed: _openCamera,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PopupMenuButton(
-                            onSelected: (String? newValue) {
-                              setState(() {
-                                shipmentStatus[index] = newValue!;
-                              });
-                            },
-                            itemBuilder: (context) => [
-                              PopupMenuItem(
-                                value: "Shipped",
-                                child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.9,
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(8),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  order['receiverName'] ?? 'No Name',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child:
-                                                DropdownButtonFormField<String>(
-                                              value: _courierDetails[index]
-                                                          ["courierName"]!
-                                                      .isNotEmpty
-                                                  ? _courierDetails[index]
-                                                      ["courierName"]
-                                                  : null,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  order['address'] ?? 'No Address',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.camera_alt,
+                                size: 20, color: Colors.black54),
+                            onPressed: _openCamera,
+                          ),
+                        ],
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 85),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                child: PopupMenuButton(
+                                  onSelected: (String? newValue) {
+                                    setState(() {
+                                      shipmentStatus[index] = newValue!;
+                                    });
+                                  },
+                                  itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      value: "Shipped",
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.9,
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child:
+                                                      DropdownButtonFormField<
+                                                          String>(
+                                                    value: _courierDetails[
+                                                                    index]
+                                                                ["courierName"]!
+                                                            .isNotEmpty
+                                                        ? _courierDetails[index]
+                                                            ["courierName"]
+                                                        : null,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                      hintText: "Courier Name",
+                                                      contentPadding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 10,
+                                                              horizontal: 10),
+                                                    ),
+                                                    items: [
+                                                      "DHL",
+                                                      "FedEx",
+                                                      "UPS",
+                                                      "Blue Dart",
+                                                      "Delhivery",
+                                                      "Other"
+                                                    ].map((String courier) {
+                                                      return DropdownMenuItem<
+                                                          String>(
+                                                        value: courier,
+                                                        child: Text(courier),
+                                                      );
+                                                    }).toList(),
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        _courierDetails[index][
+                                                                "courierName"] =
+                                                            value!;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(
+                                                      Icons.camera_alt,
+                                                      size: 20,
+                                                      color: Colors.black54),
+                                                  onPressed: _openCamera,
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 10),
+                                            TextField(
+                                              onChanged: (value) {
+                                                _courierDetails[index]
+                                                    ["trackingId"] = value;
+                                              },
                                               decoration: const InputDecoration(
-                                                hintText: "Courier Name",
+                                                hintText: "Tracking ID",
                                                 contentPadding:
                                                     EdgeInsets.symmetric(
                                                         vertical: 10,
                                                         horizontal: 10),
                                               ),
-                                              items: [
-                                                "DHL",
-                                                "FedEx",
-                                                "UPS",
-                                                "Blue Dart",
-                                                "Delhivery",
-                                                "Other"
-                                              ].map((String courier) {
-                                                return DropdownMenuItem<String>(
-                                                  value: courier,
-                                                  child: Text(courier),
-                                                );
-                                              }).toList(),
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _courierDetails[index]
-                                                      ["courierName"] = value!;
-                                                });
-                                              },
                                             ),
-                                          ),
-                                          IconButton(
-                                            icon: const Icon(Icons.camera_alt,
-                                                size: 20,
-                                                color: Colors.black54),
-                                            onPressed: _openCamera,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextField(
-                                        onChanged: (value) {
-                                          _courierDetails[index]["trackingId"] =
-                                              value;
-                                        },
-                                        decoration: const InputDecoration(
-                                          hintText: "Tracking ID",
-                                          contentPadding: EdgeInsets.symmetric(
-                                              vertical: 10, horizontal: 10),
+                                            const SizedBox(height: 10),
+                                            Center(
+                                              child: ElevatedButton(
+                                                onPressed: () {
+                                                  String courierName =
+                                                      _courierDetails[index]
+                                                          ["courierName"]!;
+                                                  String trackingId =
+                                                      _courierDetails[index]
+                                                          ["trackingId"]!;
+                                                  updateOrder(order['_id'],
+                                                      courierName, trackingId);
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Color(0xffE15D5D),
+                                                ),
+                                                child: const Text(
+                                                  "Submit",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      const SizedBox(height: 10),
-                                      Center(
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            String courierName =
-                                                _courierDetails[index]
-                                                    ["courierName"]!;
-                                            String trackingId =
-                                                _courierDetails[index]
-                                                    ["trackingId"]!;
-
-                                            updateOrder(order['_id'],
-                                                courierName, trackingId);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xffE15D5D),
-                                          ),
-                                          child: const Text(
-                                            "Submit",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
+                                  ],
+                                  child: Text(
+                                    shipmentStatus[index],
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          shipmentStatus[index] == "Unshipped"
+                                              ? Colors.red
+                                              : Colors.green,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ],
-                            child: Text(
-                              shipmentStatus[index],
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: shipmentStatus[index] == "Unshipped"
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
                             ),
-                          ),
+                            SizedBox(width: 5),
+                            Text("No Enquiry"),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
