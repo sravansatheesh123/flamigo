@@ -31,7 +31,7 @@ class _OrderState extends State<Order> {
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.29.10:5000/orders'));
+          await http.get(Uri.parse('http://localhost:5000/orders'));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
