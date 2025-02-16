@@ -488,6 +488,7 @@ class _EnquiryState extends State<Enquiry> {
                 ),
               if (errorMessage.isEmpty && searchController.text.isEmpty)
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: allItems.map((result) {
                     if (result == "How to track my order?") {
                       return _buildExpandableTile(
@@ -499,18 +500,17 @@ class _EnquiryState extends State<Enquiry> {
                             isExpandedOrderTracking = !isExpandedOrderTracking;
                           });
                         },
-                        content: const [
-                          Text("Follow these steps to track your order:"),
-                          SizedBox(height: 5),
-                          Text(
-                              "• Enter your contact number in the track via contact input field."),
-                          Text("• Click on the search icon 🔍."),
-                          Text(
-                              "• After a few days of dispatching the order, it will be updated with a courier website link and tracking ID."),
-                          Text(
-                              "• When you see courier details, go to the link and enter your tracking ID."),
-                          Text(
-                              "• You will be able to see the status of your parcel."),
+                        content: [
+                          const SizedBox(height: 5),
+                          _buildBulletPoint(
+                              "Enter your contact number in the track via contact input field."),
+                          _buildBulletPoint("Click on the search icon 🔍."),
+                          _buildBulletPoint(
+                              "After a few days of dispatching the order, it will be updated with a courier website link and tracking ID."),
+                          _buildBulletPoint(
+                              "When you see courier details, go to the link and enter your tracking ID."),
+                          _buildBulletPoint(
+                              "You will be able to see the status of your parcel."),
                         ],
                       );
                     } else if (result == "Estimate time of delivery") {
@@ -523,14 +523,12 @@ class _EnquiryState extends State<Enquiry> {
                             isExpandedDeliveryTime = !isExpandedDeliveryTime;
                           });
                         },
-                        content: const [
-                          Text(
-                              "The estimated date of delivery is usually 10 days."),
-                          SizedBox(height: 5),
-                          Text(
-                              "• However, it will be delivered sooner if you have discussed it with our customer support."),
-                          Text(
-                              "• If your delivery location is near our factory, it may arrive earlier."),
+                        content: [
+                          const SizedBox(height: 5),
+                          _buildBulletPoint(
+                              "However, it will be delivered sooner if you have discussed it with our customer support."),
+                          _buildBulletPoint(
+                              "If your delivery location is near our factory, it may arrive earlier."),
                         ],
                       );
                     } else if (result ==
@@ -544,12 +542,12 @@ class _EnquiryState extends State<Enquiry> {
                             isExpandedFlamingoOrder = !isExpandedFlamingoOrder;
                           });
                         },
-                        content: const [
-                          Text(
+                        content: [
+                          const Text(
                               "We are glad to provide you with the best quality products and packaging."),
-                          SizedBox(height: 5),
-                          Text(
-                              "• If you want to order something different other than website hampers, contact us over WhatsApp for the same."),
+                          const SizedBox(height: 5),
+                          _buildBulletPoint(
+                              "If you want to order something different other than website hampers, contact us over WhatsApp for the same."),
                         ],
                       );
                     } else {
@@ -560,6 +558,19 @@ class _EnquiryState extends State<Enquiry> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("• ", style: TextStyle(fontSize: 16)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
+        ],
       ),
     );
   }

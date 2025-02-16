@@ -71,7 +71,7 @@ class _AllorderState extends State<Allorder> {
 
       if (response.statusCode == 200) {
         fetchData();
-        print('Order updated successfully');
+        print('Order updated successfully $response');
       } else {
         print('Failed to update order');
       }
@@ -186,11 +186,15 @@ class _AllorderState extends State<Allorder> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Tracking ID at the top
+
+                    const SizedBox(height: 8), // Spacing
+
                     Row(
                       children: [
                         Container(
                           width: 80,
-                          height: 50,
+                          height: 80,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(color: Colors.grey[200]),
                           child: Text(
@@ -229,23 +233,31 @@ class _AllorderState extends State<Allorder> {
                         ),
                       ],
                     ),
+
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(
-                          onPressed: () =>
-                              _showShipmentDialog(index, order['_id']),
-                          child: Text(
-                            shipmentStatus[index],
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: shipmentStatus[index] == "Unshipped"
-                                  ? Colors.red
-                                  : Colors.green,
+                        // Moves "Shipped/Unshipped" slightly to the left
+                        Padding(
+                          padding: const EdgeInsets.only(left: 80),
+                          child: TextButton(
+                            onPressed: () =>
+                                _showShipmentDialog(index, order['_id']),
+                            child: Text(
+                              shipmentStatus[index],
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: shipmentStatus[index] == "Unshipped"
+                                    ? Colors.red
+                                    : const Color(0xff007580),
+                              ),
                             ),
                           ),
                         ),
+
+                        // Adds a small space before "No Enquiry"
+                        const SizedBox(width: 10),
+
                         const Text("No Enquiry"),
                       ],
                     ),

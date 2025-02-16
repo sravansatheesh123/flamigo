@@ -142,7 +142,7 @@ class _HomepageState extends State<Homepage> {
     };
 
     // API URL
-    final Uri apiUrl = Uri.parse('http://192.168.1.7:5000/orders');
+    final Uri apiUrl = Uri.parse('http://localhost:5000/orders');
 
     try {
       // Creating a multipart request
