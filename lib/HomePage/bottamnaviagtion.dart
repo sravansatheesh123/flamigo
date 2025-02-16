@@ -32,82 +32,89 @@ class _HomemainState extends State<Bottamnaviagtion> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xffFFB6B6),
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
-          child: Container(
-            color: Color(0xffFFB6B6),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const SizedBox(width: 2),
-                        IconButton(
-                          icon: const Icon(Icons.menu, color: Colors.black),
-                          onPressed: () {},
-                        ),
-                        const SizedBox(width: 5),
-                        Image.asset(
-                          'assets/images/Flamingo Logo.png',
-                          width: 55,
-                          height: 55,
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.person_2_outlined,
-                              color: Colors.white),
-                          onPressed: () {},
-                        ),
-                        const Text(
-                          "Sagar",
-                          style: TextStyle(
-                            color: Colors.white,
+        appBar: _selectedIndex == 0
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(100),
+                child: Container(
+                  color: Color(0xffFFB6B6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const SizedBox(width: 2),
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.menu, color: Colors.black),
+                                onPressed: () {},
+                              ),
+                              const SizedBox(width: 5),
+                              Image.asset(
+                                'assets/images/Flamingo Logo.png',
+                                width: 55,
+                                height: 55,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.person_2_outlined,
+                                    color: Colors.white),
+                                onPressed: () {},
+                              ),
+                              const Text(
+                                "Sagar",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                            ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 40,
+                        child: TextField(
+                          style: const TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Roboto',
+                            color: Colors.grey,
+                          ),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            prefixIcon:
+                                const Icon(Icons.search, color: Colors.grey),
+                            suffixIcon:
+                                const Icon(Icons.mic, color: Colors.grey),
+                            hintText: "Search using name or contact",
+                            hintStyle: const TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Roboto',
+                              color: Colors.grey,
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
+                              borderSide: BorderSide.none,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 5),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 40,
-                  child: TextField(
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Roboto',
-                      color: Colors.grey,
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      suffixIcon: const Icon(Icons.mic, color: Colors.grey),
-                      hintText: "Search using name or contact",
-                      hintStyle: const TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Roboto',
-                        color: Colors.grey,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : null, // No AppBar for Order and Profile pages
         body: _pages[_selectedIndex],
         bottomNavigationBar: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),

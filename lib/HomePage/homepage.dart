@@ -132,22 +132,22 @@ class _HomepageState extends State<Homepage> {
     String contact = _textControllers[4].text;
     String color = _textControllers[5].text;
     String name = _nameController.text;
-    String trackingId = '';
+    String trackingId = DateTime.now().millisecondsSinceEpoch.toString();
 
     Map<String, String> orderData = {
-      'order_id': orderId,
-      'order_details': orderDetails,
-      'receiver_name': receiverName,
+      'orderId': orderId,
+      'orderDetails': orderDetails,
+      'receiverName': receiverName,
       'address': address,
       'contact': contact,
       'color': color,
       'customer_name': name,
       'trackingId': trackingId,
-      'is_gst_inclusive': 'false',
+      'gst': 'false',
     };
 
     // API URL
-    final Uri apiUrl = Uri.parse('http://192.168.29.10:5100/orders');
+    final Uri apiUrl = Uri.parse('http://192.168.1.7:5000/orders');
 
     try {
       // Creating a multipart request
