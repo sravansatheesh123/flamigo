@@ -18,7 +18,7 @@ class _OrderState extends State<Order> {
   final List<String> _tabs = ["All Orders", "Unshipped", "Enquiry"];
   final List<Widget> _pages = [
     const Allorder(),
-    Unshiped(),
+    Unshipped(),
     const Enquiry(),
   ];
 
@@ -33,7 +33,7 @@ class _OrderState extends State<Order> {
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.29.10:5100/orders'));
+          await http.get(Uri.parse('http://192.168.29.10:5000/orders'));
 
       if (response.statusCode == 200) {
         // Parse the JSON response if successful
@@ -51,6 +51,87 @@ class _OrderState extends State<Order> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: _selectedIndex == 2 // Hide AppBar on Enquiry tab
+          ? null
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(100),
+              child: Container(
+                color: Color(0xffFFB6B6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const SizedBox(width: 2),
+                            IconButton(
+                              icon: const Icon(Icons.menu, color: Colors.black),
+                              onPressed: () {},
+                            ),
+                            const SizedBox(width: 5),
+                            Image.asset(
+                              'assets/images/Flamingo Logo.png',
+                              width: 55,
+                              height: 55,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.person_2_outlined,
+                                  color: Colors.white),
+                              onPressed: () {},
+                            ),
+                            const Text(
+                              "Sagar",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: TextField(
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Roboto',
+                          color: Colors.grey,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          prefixIcon:
+                              const Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: const Icon(Icons.mic, color: Colors.grey),
+                          hintText: "Search using name or contact",
+                          hintStyle: const TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Roboto',
+                            color: Colors.grey,
+                          ),
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
       body: Column(
         children: [
           Container(

@@ -1,27 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Unshiped extends StatelessWidget {
+class Unshipped extends StatefulWidget {
+  @override
+  _UnshippedState createState() => _UnshippedState();
+}
+
+class _UnshippedState extends State<Unshipped> {
+  List<Map<String, dynamic>> _orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      final response = await http.get(Uri.parse(
+          'http://localhost:5000/orders/shippingStatus?status=false'));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        // Access the 'data' key from the response
+        if (data['data'] != null) {
+          setState(() {
+            _orders = List<Map<String, dynamic>>.from(data['data']);
+          });
+        } else {
+          print('No unshipped orders found.');
+        }
+      } else {
+        print('Failed to load data');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Color(0xffFFEEEE),
-          title: Center(
-              child: const Text(
-            "Unshipped Orders",
-            style: TextStyle(fontFamily: "roboto", fontSize: 16),
-          ))),
       body: Container(
-        color: Color(0xffFFEEEE),
+        color: const Color(0xffFFEEEE),
         padding: const EdgeInsets.all(10),
         child: ListView.builder(
-          itemCount: 5, // Example: Displaying 5 unshipped orders
+          itemCount: _orders.length,
           itemBuilder: (context, index) {
+            var order = _orders[index];
             return OrderCard(
-              orderId: "#UNSHP00$index",
-              customerName: "Customer $index",
-              address: "Street $index, City, PIN - 56000$index",
-              status: "Unshipped",
+              orderId: order['orderId'] ?? 'No Order ID',
+              customerName: order['receiverName'] ?? 'No Name',
+              address: order['address'] ?? 'No Address',
+              status: order['shippedUnshippedStatus'] ? 'Shipped' : 'Unshipped',
             );
           },
         ),
@@ -71,7 +104,7 @@ class OrderCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             ),
