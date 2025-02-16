@@ -63,9 +63,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> updateOrder(
       String orderId, String courierName, String trackingId) async {
     try {
-      // Use the _id directly in the URL
-      final url =
-          'http://localhost:5000/orders/$orderId'; // Dynamic orderId (_id)
+      final url = 'http://localhost:5000/orders/$orderId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
