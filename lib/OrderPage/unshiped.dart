@@ -24,7 +24,6 @@ class _UnshippedState extends State<Unshipped> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
 
-        // Access the 'data' key from the response
         if (data['data'] != null) {
           setState(() {
             _orders = List<Map<String, dynamic>>.from(data['data']);
@@ -38,6 +37,112 @@ class _UnshippedState extends State<Unshipped> {
     } catch (e) {
       print('Error occurred: $e');
     }
+  }
+
+  Future<void> updateOrder(
+      String putId, String courierName, String trackingId, String link) async {
+    try {
+      final url = 'http://localhost:5000/orders/$putId';
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'trackingId': trackingId,
+          'courierName': courierName,
+          "link": link
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        fetchData();
+        print('Order updated successfully');
+      } else {
+        print('Failed to update order');
+      }
+    } catch (e) {
+      print('Error occurred during update: $e');
+    }
+  }
+
+  void _showShipmentDialog(String putId) {
+    String selectedCourier = "";
+    String trackingId = "";
+    String link = "";
+    bool showCustomCourierField = false;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: const Text("Update Shipment"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<String>(
+                  value: selectedCourier.isNotEmpty ? selectedCourier : null,
+                  decoration: const InputDecoration(labelText: "Courier Name"),
+                  items: [
+                    "DHL",
+                    "FedEx",
+                    "UPS",
+                    "Blue Dart",
+                    "Delhivery",
+                    "Other"
+                  ].map((String courier) {
+                    return DropdownMenuItem<String>(
+                      value: courier,
+                      child: Text(courier),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCourier = value!;
+                      showCustomCourierField = value == "Other";
+                    });
+                  },
+                ),
+                if (showCustomCourierField)
+                  TextField(
+                    decoration: const InputDecoration(labelText: "Enter URL"),
+                    onChanged: (value) {
+                      link = value;
+                    },
+                  ),
+                TextField(
+                  decoration: const InputDecoration(labelText: "Tracking ID"),
+                  onChanged: (value) {
+                    trackingId = value;
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    String courierToSend =
+                        selectedCourier == "Other" ? link : selectedCourier;
+
+                    updateOrder(putId, courierToSend, trackingId, link);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffE15D5D),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 12),
+                  ),
+                  child: const Text(
+                    "Submit",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+      },
+    );
   }
 
   @override
@@ -58,12 +163,16 @@ class _UnshippedState extends State<Unshipped> {
                 itemBuilder: (context, index) {
                   var order = _orders[index];
                   return OrderCard(
+                    putId: order['_id'] ?? 'No Order ID',
                     orderId: order['orderId'] ?? 'No Order ID',
                     customerName: order['receiverName'] ?? 'No Name',
                     address: order['address'] ?? 'No Address',
                     status: order['shippedUnshippedStatus']
                         ? 'Shipped'
                         : 'Unshipped',
+                    onStatusClick: () {
+                      _showShipmentDialog(order['_id']);
+                    },
                   );
                 },
               ),
@@ -77,6 +186,8 @@ class OrderCard extends StatelessWidget {
   final String customerName;
   final String address;
   final String status;
+  final String putId;
+  final VoidCallback onStatusClick;
 
   const OrderCard({
     Key? key,
@@ -84,6 +195,8 @@ class OrderCard extends StatelessWidget {
     required this.customerName,
     required this.address,
     required this.status,
+    required this.putId,
+    required this.onStatusClick,
   }) : super(key: key);
 
   @override
@@ -98,7 +211,6 @@ class OrderCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Order ID Box
             Container(
               width: 70,
               height: 70,
@@ -118,8 +230,6 @@ class OrderCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-
-            // Order Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,13 +247,16 @@ class OrderCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        status,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffE15D5D),
-                          decoration: TextDecoration.underline,
+                      GestureDetector(
+                        onTap: onStatusClick,
+                        child: Text(
+                          status,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xffE15D5D),
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                       const Text(
@@ -159,7 +272,6 @@ class OrderCard extends StatelessWidget {
                 ],
               ),
             ),
-
             IconButton(
               icon: const Icon(Icons.camera_alt, color: Colors.black54),
               onPressed: () {},

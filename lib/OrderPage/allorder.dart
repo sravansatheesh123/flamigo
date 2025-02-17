@@ -39,13 +39,8 @@ class _AllorderState extends State<Allorder> {
                     ? "Shipped"
                     : "Unshipped")
                 .toList();
-            _courierDetails = List.generate(
-                _orders.length,
-                (_) => {
-                      "courierName": "",
-                      "trackingId": "",
-                      "customCourier": "" // For "Other" option
-                    });
+            _courierDetails = List.generate(_orders.length,
+                (_) => {"courierName": "", "trackingId": "", "link": ""});
           });
         } else {
           print('Orders not found in response.');
@@ -58,15 +53,18 @@ class _AllorderState extends State<Allorder> {
     }
   }
 
-  Future<void> updateOrder(
-      String orderId, String courierName, String trackingId) async {
+  Future<void> updateOrder(String orderId, String courierName,
+      String trackingId, String link) async {
     try {
       final url = 'http://localhost:5000/orders/$orderId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body:
-            json.encode({'trackingId': trackingId, 'courierName': courierName}),
+        body: json.encode({
+          'trackingId': trackingId,
+          'courierName': courierName,
+          "link": link
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -125,7 +123,7 @@ class _AllorderState extends State<Allorder> {
                   TextField(
                     decoration: const InputDecoration(labelText: "Enter url"),
                     onChanged: (value) {
-                      _courierDetails[index]["customCourier"] = value;
+                      _courierDetails[index]["link"] = value;
                     },
                   ),
 
@@ -143,10 +141,13 @@ class _AllorderState extends State<Allorder> {
                 child: ElevatedButton(
                   onPressed: () {
                     String courierToSend = selectedCourier == "Other"
-                        ? _courierDetails[index]["customCourier"]!
+                        ? _courierDetails[index]["link"]!
                         : selectedCourier;
 
-                    updateOrder(orderId, courierToSend, trackingId);
+                    String trackingId = _courierDetails[index]["trackingId"]!;
+                    String link = _courierDetails[index]["link"]!;
+
+                    updateOrder(orderId, courierToSend, trackingId, link);
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
