@@ -13,6 +13,7 @@ class _EnquiryState extends State<Enquiry> {
   Map<String, dynamic> firstOrder = {};
   bool isLoading = false;
   String receiverName = "";
+  String amount = "";
   String errorMessage = "";
   TextEditingController searchController = TextEditingController();
 
@@ -44,8 +45,11 @@ class _EnquiryState extends State<Enquiry> {
 
           setState(() {
             receiverName = firstOrder['receiverName'] ?? "Unknown";
+            amount = firstOrder['amount']?.toString() ?? "amount";
+
             errorMessage = "";
           });
+          print("pritn response $amount");
         } else {
           setState(() {
             errorMessage = 'No matching contact found.';
@@ -420,16 +424,16 @@ class _EnquiryState extends State<Enquiry> {
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Total",
+                              children: [
+                                const Text("Total",
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold)),
-                                SizedBox(
+                                const SizedBox(
                                   width: 125,
                                 ),
-                                Text("₹3,559",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(amount,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -439,10 +443,10 @@ class _EnquiryState extends State<Enquiry> {
                       const SizedBox(height: 2),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text("Thank you  for doing\n bussines "),
-                          Text("Recived"),
-                          Text("₹3,559"),
+                        children: [
+                          const Text("Thank you  for doing\n bussines "),
+                          const Text("Recived"),
+                          Text(amount),
                         ],
                       ),
                       const SizedBox(height: 2),
