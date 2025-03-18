@@ -1,0 +1,2 @@
+C:/Naveen_Projects/myNewProject/flamigo/android/app/.cxx/Debug/2l1o5w1n/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Naveen_Projects/myNewProject/flamigo/android/app/.cxx/Debug/2l1o5w1n/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -20,6 +20,9 @@ class _HomepageState extends State<Homepage> {
   bool _showOrderPopup = false;
   bool _isGSTSelected = false;
 
+  // To track errors
+  List<String> _errors = List.generate(7, (index) => "");
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +64,6 @@ class _HomepageState extends State<Homepage> {
     return "";
   }
 
-// Extract full item details (including numbered list)
   String _extractItemDetails(List<String> lines) {
     StringBuffer items = StringBuffer();
     bool startAdding = false;
@@ -69,18 +71,16 @@ class _HomepageState extends State<Homepage> {
     for (String line in lines) {
       if (line.contains("(Item details)")) {
         startAdding = true;
-        continue; // Skip the (Item details) line
+        continue;
       }
       if (startAdding) {
-        if (line.contains("Receiver’s name"))
-          break; // Stop at receiver's details
+        if (line.contains("Receiver’s name")) break;
         items.writeln(line.trim());
       }
     }
     return items.toString().trim();
   }
 
-// Extract address (multi-line)
   String _extractAddress(List<String> lines) {
     StringBuffer address = StringBuffer();
     bool startAdding = false;
@@ -91,8 +91,7 @@ class _HomepageState extends State<Homepage> {
         continue;
       }
       if (startAdding) {
-        if (line.contains("State") || line.contains("Pincode"))
-          break; // Stop at state/pincode
+        if (line.contains("State") || line.contains("Pincode")) break;
         address.writeln(line.trim());
       }
     }
@@ -117,7 +116,26 @@ class _HomepageState extends State<Homepage> {
   String trackingId = DateTime.now().millisecondsSinceEpoch.toString();
 
   Future<void> _submitOrder() async {
-    // Get data from text fields
+    // Validate fields
+    setState(() {
+      _errors = List.generate(7, (index) => ""); // Reset errors
+    });
+
+    bool hasError = false;
+
+    // Check if each required field is filled
+    for (int i = 0; i < 7; i++) {
+      if (_textControllers[i].text.isEmpty) {
+        setState(() {
+          _errors[i] = "This field is required.";
+        });
+        hasError = true;
+      }
+    }
+
+    // If there are errors, return early
+    if (hasError) return;
+
     String orderId = _textControllers[0].text;
     String orderDetails = _textControllers[1].text;
     String receiverName = _textControllers[2].text;
@@ -126,10 +144,7 @@ class _HomepageState extends State<Homepage> {
     String color = _textControllers[5].text;
     String amount = _textControllers[6].text;
 
-    String trackingId = DateTime.now().millisecondsSinceEpoch.toString();
-
-    // API data to send
-    Map<String, String> orderData = {
+    Map<String, dynamic> orderData = {
       'orderId': orderId,
       'orderDetails': orderDetails,
       'receiverName': receiverName,
@@ -137,32 +152,26 @@ class _HomepageState extends State<Homepage> {
       'contact': contact,
       'color': color,
       'amount': amount,
-      'trackingId': trackingId,
-      'gst': 'false',
+      'gst': _isGSTSelected,
     };
 
-    // API URL
-    final Uri apiUrl = Uri.parse('http://localhost:5000/orders');
+    final Uri apiUrl = Uri.parse('http://192.168.1.43:5001/orders');
 
     try {
-      // Creating a multipart request
-      var request = http.MultipartRequest('POST', apiUrl)
-        ..fields.addAll(orderData);
-
-      // Send the request
-      final response = await request.send();
-
-      // Get the response
-      final responseBody = await http.Response.fromStream(response);
-
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${responseBody.body}');
+      final response = await http.post(
+        apiUrl,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(orderData),
+      );
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order submitted successfully!')),
         );
 
+        // Clear fields after submission
         for (var controller in _textControllers) {
           controller.clear();
         }
@@ -298,17 +307,14 @@ class _HomepageState extends State<Homepage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTextField("Order ID", _textControllers[0]),
-            _buildTextField("Order Details", _textControllers[1]),
-            _buildTextField("Received Name", _textControllers[2]),
-            _buildTextField("Address", _textControllers[3]),
-            _buildTextField("Contact", _textControllers[4]),
-            _buildTextField("Color", _textControllers[5]),
-            _buildTextField("Amount", _textControllers[6]),
-
-            // Move GST checkbox below all text fields
+            _buildTextField("Order ID", _textControllers[0], 0),
+            _buildTextField("Order Details", _textControllers[1], 1),
+            _buildTextField("Received Name", _textControllers[2], 2),
+            _buildTextField("Address", _textControllers[3], 3),
+            _buildTextField("Contact", _textControllers[4], 4),
+            _buildTextField("Color", _textControllers[5], 5),
+            _buildTextField("Amount", _textControllers[6], 6),
             _buildGSTCheckbox(),
-
             const SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -358,15 +364,22 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(
+      String label, TextEditingController controller, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              labelText: label,
+              border: const OutlineInputBorder(),
+              errorText: _errors[index].isNotEmpty ? _errors[index] : null,
+            ),
+          ),
+        ],
       ),
     );
   }

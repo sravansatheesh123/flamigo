@@ -19,7 +19,7 @@ class _UnshippedState extends State<Unshipped> {
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://localhost:5000/orders/shippingStatus?status=false'));
+          'http://192.168.1.43:5001/orders/shippingStatus?status=false'));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -42,7 +42,7 @@ class _UnshippedState extends State<Unshipped> {
   Future<void> updateOrder(
       String putId, String courierName, String trackingId, String link) async {
     try {
-      final url = 'http://localhost:5000/orders/$putId';
+      final url = 'http://192.168.1.43:5001/orders/$putId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
