@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'dart:io';
 
 class Allorder extends StatefulWidget {
   const Allorder({super.key});
@@ -26,7 +28,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://localhost:5000/orders'));
+          await http.get(Uri.parse('http://192.168.1.43:5001/orders'));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -56,7 +58,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> updateOrder(String orderId, String courierName,
       String trackingId, String link) async {
     try {
-      final url = 'http://localhost:5000/orders/$orderId';
+      final url = 'http://192.168.1.43:5001/orders/$orderId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -78,6 +80,55 @@ class _AllorderState extends State<Allorder> {
     }
   }
 
+  // Modified function using Dio
+  Future<void> uploadImage(
+      File imageFile, String orderId, BuildContext context) async {
+    try {
+      final dio = Dio();
+      final uri = 'http://192.168.1.43:5001/orders/uploadImage/$orderId';
+
+      // Create FormData to send the file
+      FormData formData = FormData.fromMap({
+        'image':
+            await MultipartFile.fromFile(imageFile.path, filename: 'image.jpg'),
+      });
+
+      // You can add headers if needed
+      dio.options.headers = {
+        'Authorization': 'Bearer YOUR_TOKEN', // Replace with your token
+        'Content-Type': 'multipart/form-data',
+      };
+
+      // Send the request
+      Response response = await dio.put(uri, data: formData);
+
+      // Handle response
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image uploaded successfully')));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to upload image')));
+      }
+    } catch (e) {
+      // Handle any exceptions during the request
+      print('Error occurred during image upload: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error occurred during upload')));
+    }
+  }
+
+  void _pickImageAndUpload(int index) async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      if (await imageFile.exists()) {
+        String orderId = _orders[index]['_id'];
+        await uploadImage(imageFile, orderId, context);
+      }
+    }
+  }
+
   void _showShipmentDialog(int index, String orderId) {
     String selectedCourier = _courierDetails[index]["courierName"] ?? "";
     String trackingId = _courierDetails[index]["trackingId"] ?? "";
@@ -92,7 +143,6 @@ class _AllorderState extends State<Allorder> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Courier Dropdown
                 DropdownButtonFormField<String>(
                   value: selectedCourier.isNotEmpty ? selectedCourier : null,
                   decoration: const InputDecoration(labelText: "Courier Name"),
@@ -117,8 +167,6 @@ class _AllorderState extends State<Allorder> {
                     });
                   },
                 ),
-
-                // Show custom text field if "Other" is selected
                 if (showCustomCourierField)
                   TextField(
                     decoration: const InputDecoration(labelText: "Enter url"),
@@ -126,8 +174,6 @@ class _AllorderState extends State<Allorder> {
                       _courierDetails[index]["link"] = value;
                     },
                   ),
-
-                // Tracking ID Field
                 TextField(
                   decoration: const InputDecoration(labelText: "Tracking ID"),
                   onChanged: (value) {
@@ -151,7 +197,7 @@ class _AllorderState extends State<Allorder> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffE15D5D), // Button color
+                    backgroundColor: const Color(0xffE15D5D),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 40, vertical: 12),
                   ),
@@ -187,10 +233,7 @@ class _AllorderState extends State<Allorder> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Tracking ID at the top
-
-                    const SizedBox(height: 8), // Spacing
-
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Container(
@@ -226,18 +269,13 @@ class _AllorderState extends State<Allorder> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.camera_alt,
-                              size: 20, color: Colors.black54),
-                          onPressed: () async {
-                            await _picker.pickImage(source: ImageSource.camera);
-                          },
-                        ),
+                            icon: const Icon(Icons.camera_alt,
+                                size: 20, color: Colors.black54),
+                            onPressed: () => _pickImageAndUpload(index))
                       ],
                     ),
-
                     Row(
                       children: [
-                        // Moves "Shipped/Unshipped" slightly to the left
                         Padding(
                           padding: const EdgeInsets.only(left: 80),
                           child: TextButton(
@@ -255,10 +293,7 @@ class _AllorderState extends State<Allorder> {
                             ),
                           ),
                         ),
-
-                        // Adds a small space before "No Enquiry"
                         const SizedBox(width: 10),
-
                         const Text("No Enquiry"),
                       ],
                     ),
