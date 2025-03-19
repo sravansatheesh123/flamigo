@@ -28,7 +28,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> fetchData() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.43:5001/orders'));
+          await http.get(Uri.parse('http://192.168.1.56:5001/orders'));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -58,7 +58,7 @@ class _AllorderState extends State<Allorder> {
   Future<void> updateOrder(String orderId, String courierName,
       String trackingId, String link) async {
     try {
-      final url = 'http://192.168.1.43:5001/orders/$orderId';
+      final url = 'http://192.168.1.56:5001/orders/$orderId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -80,29 +80,71 @@ class _AllorderState extends State<Allorder> {
     }
   }
 
-  // Modified function using Dio
-  Future<void> uploadImage(
-      File imageFile, String orderId, BuildContext context) async {
+  void _pickImageAndUpload(int index) {
+    _showImagePickerDialog(index);
+  }
+
+  void _showImagePickerDialog(int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final pickedFile =
+                      await _picker.pickImage(source: ImageSource.camera);
+                  _uploadPickedImage(pickedFile, index);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final pickedFile =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  _uploadPickedImage(pickedFile, index);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _uploadPickedImage(XFile? pickedFile, int index) async {
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      if (await imageFile.exists()) {
+        String orderId = _orders[index]['_id'];
+        await uploadImage(imageFile, orderId);
+      }
+    }
+  }
+
+  Future<void> uploadImage(File imageFile, String orderId) async {
     try {
       final dio = Dio();
-      final uri = 'http://192.168.1.43:5001/orders/uploadImage/$orderId';
+      final uri = 'http://192.168.1.56:5001/orders/uploadImage/$orderId';
 
-      // Create FormData to send the file
       FormData formData = FormData.fromMap({
         'image':
             await MultipartFile.fromFile(imageFile.path, filename: 'image.jpg'),
       });
 
-      // You can add headers if needed
       dio.options.headers = {
-        'Authorization': 'Bearer YOUR_TOKEN', // Replace with your token
+        'Authorization': 'Bearer YOUR_TOKEN',
         'Content-Type': 'multipart/form-data',
       };
 
-      // Send the request
       Response response = await dio.put(uri, data: formData);
 
-      // Handle response
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Image uploaded successfully')));
@@ -111,21 +153,9 @@ class _AllorderState extends State<Allorder> {
             const SnackBar(content: Text('Failed to upload image')));
       }
     } catch (e) {
-      // Handle any exceptions during the request
       print('Error occurred during image upload: $e');
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error occurred during upload')));
-    }
-  }
-
-  void _pickImageAndUpload(int index) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedFile != null) {
-      File imageFile = File(pickedFile.path);
-      if (await imageFile.exists()) {
-        String orderId = _orders[index]['_id'];
-        await uploadImage(imageFile, orderId, context);
-      }
     }
   }
 
@@ -189,7 +219,6 @@ class _AllorderState extends State<Allorder> {
                     String courierToSend = selectedCourier == "Other"
                         ? _courierDetails[index]["link"]!
                         : selectedCourier;
-
                     String trackingId = _courierDetails[index]["trackingId"]!;
                     String link = _courierDetails[index]["link"]!;
 
@@ -237,7 +266,7 @@ class _AllorderState extends State<Allorder> {
                     Row(
                       children: [
                         Container(
-                          width: 80,
+                          width: 90,
                           height: 80,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(color: Colors.grey[200]),
@@ -269,9 +298,12 @@ class _AllorderState extends State<Allorder> {
                           ),
                         ),
                         IconButton(
-                            icon: const Icon(Icons.camera_alt,
-                                size: 20, color: Colors.black54),
-                            onPressed: () => _pickImageAndUpload(index))
+                          icon: order['image'] != null && order['image'] != ''
+                              ? Icon(Icons.no_photography)
+                              : Icon(Icons.camera_alt,
+                                  size: 20, color: Colors.black54),
+                          onPressed: () => _pickImageAndUpload(index),
+                        )
                       ],
                     ),
                     Row(

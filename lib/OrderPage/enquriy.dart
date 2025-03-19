@@ -33,7 +33,7 @@ class _EnquiryState extends State<Enquiry> {
       isLoading = true;
     });
 
-    final url = 'http://192.168.1.43:5001/orders/contact?contact=$contact';
+    final url = 'http://192.168.1.56:5001/orders/contact?contact=$contact';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -590,7 +590,7 @@ class _EnquiryState extends State<Enquiry> {
                                       const SizedBox(
                                         width: 50,
                                       ),
-                                      Text(formattedTotal,
+                                      Text(formattedAmountString,
                                           style: const TextStyle(
                                               fontWeight: FontWeight.bold)),
                                     ],
@@ -659,7 +659,7 @@ class _EnquiryState extends State<Enquiry> {
                             width: double.infinity,
                             padding: const EdgeInsets.all(10),
                             child: Image.network(
-                              "http://192.168.1.43:5001/api/${firstOrder['image'][0]}",
+                              "http://192.168.1.56:5001/api/${firstOrder['image'][0]}",
                               height: 180.0,
                               width: 200.0,
                             ),
