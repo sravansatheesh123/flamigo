@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'dart:io';
 
 class Unshipped extends StatefulWidget {
   @override
@@ -8,6 +11,7 @@ class Unshipped extends StatefulWidget {
 }
 
 class _UnshippedState extends State<Unshipped> {
+  final ImagePicker _picker = ImagePicker();
   List<Map<String, dynamic>> _orders = [];
 
   @override
@@ -19,7 +23,7 @@ class _UnshippedState extends State<Unshipped> {
   Future<void> fetchData() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://192.168.1.43:5001/orders/shippingStatus?status=false'));
+          'http://192.168.1.56:5001/orders/shippingStatus?status=false'));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
@@ -39,10 +43,90 @@ class _UnshippedState extends State<Unshipped> {
     }
   }
 
+  void _pickImageAndUpload(int index) {
+    _showImagePickerDialog(index);
+  }
+
+  void _showImagePickerDialog(int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text('Camera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final pickedFile =
+                      await _picker.pickImage(source: ImageSource.camera);
+                  _uploadPickedImage(pickedFile, index);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Gallery'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final pickedFile =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  _uploadPickedImage(pickedFile, index);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _uploadPickedImage(XFile? pickedFile, int index) async {
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      if (await imageFile.exists()) {
+        String orderId = _orders[index]['_id'];
+        await uploadImage(imageFile, orderId);
+      }
+    }
+  }
+
+  Future<void> uploadImage(File imageFile, String orderId) async {
+    try {
+      final dio = Dio();
+      final uri = 'http://192.168.1.56:5001/orders/uploadImage/$orderId';
+
+      FormData formData = FormData.fromMap({
+        'image':
+            await MultipartFile.fromFile(imageFile.path, filename: 'image.jpg'),
+      });
+
+      dio.options.headers = {
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'multipart/form-data',
+      };
+
+      Response response = await dio.put(uri, data: formData);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Image uploaded successfully')));
+        fetchData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to upload image')));
+      }
+    } catch (e) {
+      print('Error occurred during image upload: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error occurred during upload')));
+    }
+  }
+
   Future<void> updateOrder(
       String putId, String courierName, String trackingId, String link) async {
     try {
-      final url = 'http://192.168.1.43:5001/orders/$putId';
+      final url = 'http://192.168.1.56:5001/orders/$putId';
       final response = await http.put(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -173,6 +257,9 @@ class _UnshippedState extends State<Unshipped> {
                     onStatusClick: () {
                       _showShipmentDialog(order['_id']);
                     },
+                    onCameraClick: () {
+                      _pickImageAndUpload(index);
+                    },
                   );
                 },
               ),
@@ -188,6 +275,7 @@ class OrderCard extends StatelessWidget {
   final String status;
   final String putId;
   final VoidCallback onStatusClick;
+  final VoidCallback onCameraClick;
 
   const OrderCard({
     Key? key,
@@ -197,6 +285,7 @@ class OrderCard extends StatelessWidget {
     required this.status,
     required this.putId,
     required this.onStatusClick,
+    required this.onCameraClick,
   }) : super(key: key);
 
   @override
@@ -212,7 +301,7 @@ class OrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 70,
+              width: 80,
               height: 70,
               alignment: Alignment.center,
               decoration: BoxDecoration(
@@ -223,7 +312,7 @@ class OrderCard extends StatelessWidget {
                 orderId,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
@@ -274,7 +363,7 @@ class OrderCard extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.camera_alt, color: Colors.black54),
-              onPressed: () {},
+              onPressed: onCameraClick,
             ),
           ],
         ),

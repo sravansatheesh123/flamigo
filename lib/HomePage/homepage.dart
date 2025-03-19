@@ -43,9 +43,9 @@ class _HomepageState extends State<Homepage> {
 
       _textControllers[2].text = _extractDetail(lines, "Receiver’s name");
       _textControllers[3].text = _extractAddress(lines);
-      _textControllers[4].text = _extractDetail(lines, "Contact");
+      _textControllers[4].text = _extractDetail(lines, "Contact -");
       _textControllers[5].text = _extractDetail(lines, "Color");
-      _textControllers[6].text = _extractDetail(lines, "Amount");
+      _textControllers[6].text = _extractDetail(lines, "Amount -");
       _nameController.text = _extractDetail(lines, "");
 
       _showOrderPopup = true;
@@ -133,7 +133,6 @@ class _HomepageState extends State<Homepage> {
       }
     }
 
-    // If there are errors, return early
     if (hasError) return;
 
     String orderId = _textControllers[0].text;
@@ -155,7 +154,7 @@ class _HomepageState extends State<Homepage> {
       'gst': _isGSTSelected,
     };
 
-    final Uri apiUrl = Uri.parse('http://192.168.1.43:5001/orders');
+    final Uri apiUrl = Uri.parse('http://192.168.1.56:5001/orders');
 
     try {
       final response = await http.post(
